@@ -1,4 +1,4 @@
-# OpenAPI hub project charter
+# OpenAPI space project charter
 
 ## Objective
 The goal is to have an OpenAPI design tool and a storage backend that can be integrated with APInf platform.
