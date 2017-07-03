@@ -24,7 +24,7 @@ paths:
             description: 'The OpenAPI document itself'
           x-oad-type: parameter
     x-oad-type: operation
-  documentKey:
+  /{documentKey}:
     get:
       description: 'Fetch the document with the given key.'
       responses:
