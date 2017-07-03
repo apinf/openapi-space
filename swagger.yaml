@@ -1,0 +1,82 @@
+paths:
+  /add:
+    post:
+      operationId: addAPI
+      summary: 'Store an API in the backend'
+      responses:
+        '200':
+          description: 'The OpenAPI document was stored successfully.'
+          schema:
+            x-oad-type: reference
+            $ref: '#/definitions/StoredDocument'
+          x-oad-type: response
+        '400':
+          description: 'Invalid OpenAPI document'
+          x-oad-type: response
+      parameters:
+        -
+          name: body
+          in: body
+          required: true
+          schema:
+            x-oad-type: 'null'
+            type: 'null'
+            description: 'The OpenAPI document itself'
+          x-oad-type: parameter
+    x-oad-type: operation
+  /{documentKey}:
+    get:
+      description: 'Fetch the document with the given key.'
+      responses:
+        '200':
+          description: 'Document found.'
+          schema:
+            x-oad-type: reference
+            $ref: '#/definitions/StoredDocument'
+          x-oad-type: response
+        '404':
+          description: 'Document not found.'
+          x-oad-type: response
+      parameters:
+        -
+          name: documentKey
+          in: path
+          description: 'The key of the document to fetch.'
+          required: true
+          type: string
+          x-oad-type: parameter
+    x-oad-type: operation
+definitions:
+  StoredDocument:
+    x-oad-type: object
+    type: object
+    properties:
+      key:
+        x-oad-type: string
+        type: string
+        description: 'The key of the document.'
+      document:
+        x-oad-type: 'null'
+        type: 'null'
+        description: 'The OpenAPI document itself.'
+      timestamp:
+        x-oad-type: integer
+        type: integer
+        description: 'The Unix timestamp when the document was uploaded.'
+        format: int64
+info:
+  title: 'OpenAPI space'
+  version: 0.1.0
+  description: 'A backend for storing OpenAPI specifications'
+  license:
+    name: MIT
+    url: 'https://github.com/apinf/openapi-space/blob/master/LICENSE'
+host: openapi.space
+basePath: /api/v1
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+swagger: '2.0'
