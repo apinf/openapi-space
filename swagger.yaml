@@ -1,0 +1,481 @@
+swagger: '2.0'
+info:
+  description: This is the API for OpenAPI space. This is a limited version of the [SwaggerHub registry API](https://app.swaggerhub.com/apis/swagger-hub/registry-api)
+  version: 1.0.0
+  title: OpenAPI space
+  contact:
+    name: APInf Oy
+    url: 'http://apinf.org'
+    email: info@apinf.io
+host: openapi.space
+basePath: /api/v1
+tags:
+  - name: APIs
+    description: Operations for APIs
+schemes:
+  - https
+produces:
+  - application/json
+consumes:
+  - application/json
+paths:
+  /apis:
+    get:
+      tags:
+        - APIs
+      summary: Retrieves a list of currently defined APIs in APIs.json format.
+      description: ''
+      operationId: searchApis
+      parameters:
+        - name: query
+          in: query
+          description: free text query to match
+          required: false
+          type: string
+        - name: state
+          in: query
+          description: >
+            matches against published state of the spec
+
+            * UNPUBLISHED - spec is a draft, a work in progress
+
+            * PUBLISHED - spec is a stable version ready for consuming from
+            client applications
+
+            * ANY - either PUBLISHED or UNPUBLISHED
+          required: false
+          type: string
+          default: ALL
+          enum:
+            - ALL
+            - PUBLISHED
+            - UNPUBLISHED
+        - name: tag
+          in: query
+          description: matches against tags associated with an API
+          required: false
+          type: array
+          items:
+            type: string
+          collectionFormat: multi
+        - name: page
+          in: query
+          description: page to return
+          required: false
+          type: integer
+          default: 0
+          format: int32
+        - name: limit
+          in: query
+          description: number of results per page
+          required: false
+          type: integer
+          default: 10
+          format: int32
+        - name: sort
+          in: query
+          description: |
+            sort criteria or result set
+            * NAME -
+            * UPATED
+            * CREATED
+            * OWNER
+          required: false
+          type: string
+          default: NAME
+          enum:
+            - NAME
+            - UPDATED
+            - CREATED
+            - OWNER
+        - name: order
+          in: query
+          description: sort order
+          required: false
+          type: string
+          default: ASC
+          enum:
+            - ASC
+            - DESC
+      responses:
+        '303':
+          description: 303 response
+          headers:
+            Location:
+              type: string
+      security:
+        - TokenSecured: []
+  '/apis/{owner}':
+    get:
+      tags:
+        - APIs
+      summary: Retrieves an APIs.json listing of all APIs defined for this owner
+      description: ''
+      operationId: getOwnerApis
+      parameters:
+        - name: owner
+          in: path
+          description: API or Domaion owner identifier
+          required: true
+          type: string
+        - name: page
+          in: query
+          description: page to return
+          required: false
+          type: integer
+          default: 0
+          format: int32
+        - name: limit
+          in: query
+          description: number of results per page
+          required: false
+          type: integer
+          default: 10
+          format: int32
+        - name: sort
+          in: query
+          description: |
+            sort criteria or result set
+            * NAME -
+            * UPATED
+            * CREATED
+            * OWNER
+          required: false
+          type: string
+          default: NAME
+          enum:
+            - NAME
+            - UPDATED
+            - CREATED
+            - OWNER
+        - name: order
+          in: query
+          description: sort order
+          required: false
+          type: string
+          default: ASC
+          enum:
+            - ASC
+            - DESC
+      responses:
+        '200':
+          description: a list of APIs in APIs.json format
+          schema:
+            $ref: '#/definitions/ApisJson'
+      security:
+        - TokenSecured: []
+  '/apis/{owner}/{api}':
+    get:
+      tags:
+        - APIs
+      summary: >-
+        Retrieves an APIs.json listing for all API versions for this owner and
+        API
+      operationId: getApiVersions
+      parameters:
+        - name: owner
+          in: path
+          description: API or Domaion owner identifier
+          required: true
+          type: string
+        - name: api
+          in: path
+          description: API identifier
+          required: true
+          type: string
+      responses:
+        '200':
+          description: a list of API versions in APIs.json format
+          schema:
+            $ref: '#/definitions/ApisJson'
+      security:
+        - TokenSecured: []
+    post:
+      tags:
+        - APIs
+      summary: Saves the provided Swagger definition
+      description: >-
+        Saves the provided Swagger definition; the owner must match the token
+        owner. The version will be extracted from the Swagger definitions
+        itself.
+      operationId: saveDefinition
+      consumes:
+        - application/json
+        - application/yaml
+      parameters:
+        - name: owner
+          in: path
+          description: API or Domaion owner identifier
+          required: true
+          type: string
+        - name: api
+          in: path
+          description: API identifier
+          required: true
+          type: string
+        - name: isPrivate
+          in: query
+          description: Defines whether the API has to be private
+          required: false
+          type: boolean
+          default: false
+        - name: version
+          in: query
+          description: api version
+          required: false
+          type: string
+        - in: body
+          name: definition
+          description: the Swagger definition of this API
+          required: true
+          schema:
+            type: string
+        - name: force
+          in: query
+          description: force update
+          required: false
+          type: boolean
+      responses:
+        '200':
+          description: the API was successfully saved
+        '201':
+          description: new API was successfully saved
+        '205':
+          description: the API was successfully saved and should be reloaded
+        '400':
+          description: the Swagger definition was invalid
+        '403':
+          description: maximum number of APIs reached
+        '409':
+          description: can not overwrite a published API version
+        '415':
+          description: invalid content type
+      security:
+        - TokenSecured: []
+    delete:
+      tags:
+        - APIs
+      summary: Deletes the specified API
+      description: ''
+      operationId: deleteApi
+      parameters:
+        - name: owner
+          in: path
+          description: API or Domaion owner identifier
+          required: true
+          type: string
+        - name: api
+          in: path
+          description: API identifier
+          required: true
+          type: string
+      responses:
+        '200':
+          description: the API was successfully deleted
+        '403':
+          description: access denied
+        '404':
+          description: specified API not found
+        '409':
+          description: the API has published versions and can not be deleted
+      security:
+        - TokenSecured: []
+
+  '/apis/{owner}/{api}/{version}':
+    get:
+      tags:
+        - APIs
+      summary: Retrieves the Swagger definition for the specified API and version
+      description: ''
+      operationId: getDefinition
+      produces:
+        - application/json
+        - application/yaml
+      parameters:
+        - name: owner
+          in: path
+          description: API or Domaion owner identifier
+          required: true
+          type: string
+        - name: api
+          in: path
+          description: API identifier
+          required: true
+          type: string
+        - name: version
+          in: path
+          description: version identifier
+          required: true
+          type: string
+      responses:
+        '200':
+          description: the Swagger API in requested format
+          schema:
+            type: object
+            properties: {}
+        '404':
+          description: specified API not found
+      security:
+        - TokenSecured: []
+    delete:
+      tags:
+        - APIs
+      summary: Deletes a particular version of the specified API
+      description: ''
+      operationId: deleteApiVersion
+      parameters:
+        - name: owner
+          in: path
+          description: API or Domaion owner identifier
+          required: true
+          type: string
+        - name: api
+          in: path
+          description: API identifier
+          required: true
+          type: string
+        - name: version
+          in: path
+          description: version identifier
+          required: true
+          type: string
+      responses:
+        '200':
+          description: the API version was successfully deleted
+        '403':
+          description: access denied
+        '404':
+          description: specified API not found
+        '409':
+          description: >-
+            the API version is published and can not be deleted or it is the
+            only version of this API
+      security:
+        - TokenSecured: []
+  '/apis/{owner}/{api}/{version}/swagger.json':
+    get:
+      tags:
+        - APIs
+      summary: >-
+        Retrieves the Swagger definition for the specified API and version in
+        JSON format
+      description: ''
+      operationId: getJsonDefinition
+      parameters:
+        - name: owner
+          in: path
+          description: API or Domaion owner identifier
+          required: true
+          type: string
+        - name: api
+          in: path
+          description: API identifier
+          required: true
+          type: string
+        - name: version
+          in: path
+          description: version identifier
+          required: true
+          type: string
+      responses:
+        '200':
+          description: the Swagger API in JSON format
+          schema:
+            type: object
+            properties: {}
+        '404':
+          description: specified API not found
+      security:
+        - TokenSecured: []
+  '/apis/{owner}/{api}/{version}/swagger.yaml':
+    get:
+      tags:
+        - APIs
+      summary: >-
+        Retrieves the Swagger definition for the specified API and version in
+        YAML format
+      description: ''
+      operationId: getYamlDefinition
+      produces:
+        - application/yaml
+      parameters:
+        - name: owner
+          in: path
+          description: API or Domaion owner identifier
+          required: true
+          type: string
+        - name: api
+          in: path
+          description: API identifier
+          required: true
+          type: string
+        - name: version
+          in: path
+          description: version identifier
+          required: true
+          type: string
+      responses:
+        '200':
+          description: the Swagger API in YAML format
+          schema:
+            type: object
+            properties: {}
+        '404':
+          description: specified API not found
+      security:
+        - TokenSecured: []
+securityDefinitions:
+  TokenSecured:
+    type: apiKey
+    name: Authorization
+    in: header
+definitions:
+  ApisJson:
+    type: object
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      url:
+        type: string
+      created:
+        type: string
+        format: date-time
+      modified:
+        type: string
+        format: date-time
+      specificationVersion:
+        type: string
+      offset:
+        type: integer
+        format: int32
+      totalCount:
+        type: integer
+        format: int64
+      apis:
+        type: array
+        items:
+          $ref: '#/definitions/ApisJsonApi'
+  ApisJsonProperty:
+    type: object
+    properties:
+      type:
+        type: string
+    description: an API property
+  ApisJsonApi:
+    type: object
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      tags:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+      properties:
+        type: array
+        items:
+          $ref: '#/definitions/ApisJsonProperty'
