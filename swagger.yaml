@@ -12,6 +12,8 @@ basePath: /api/v1
 tags:
   - name: APIs
     description: Operations for APIs
+  - name: Auth
+    description: Operations for authentication
 schemes:
   - https
 produces:
