@@ -27,7 +27,7 @@ paths:
         - APIs
       summary: Retrieves a list of currently defined APIs in APIs.json format.
       description: ''
-      operationId: searchApis
+      operationId: space.routes.apis.
       parameters:
         - name: query
           in: query
