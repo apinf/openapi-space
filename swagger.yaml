@@ -387,6 +387,8 @@ definitions:
         items:
           type: object
           properties:
+            owner:
+              type: string
             name:
               type: string
             url:
