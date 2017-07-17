@@ -25,7 +25,7 @@ paths:
         - APIs
       summary: Retrieves a list of currently defined APIs in API meta list format.
       description: ''
-      operationId: searchAPIs
+      operationId: search_apis
       parameters:
         - name: query
           in: query
@@ -81,7 +81,7 @@ paths:
         - APIs
       summary: Retrieves an API meta listing of all APIs defined for this owner
       description: ''
-      operationId: getOwnerAPIs
+      operationId: get_owner_apis
       parameters:
         - name: owner
           in: path
@@ -127,7 +127,7 @@ paths:
       summary: >-
         Retrieves an API meta listing for all API versions for this owner and
         API
-      operationId: getAPIVersions
+      operationId: get_api_versions
       parameters:
         - name: owner
           in: path
@@ -154,7 +154,7 @@ paths:
         Saves the provided Swagger definition; the owner must match the token
         owner. The version will be extracted from the Swagger definitions
         itself.
-      operationId: saveDefinition
+      operationId: save_definition
       consumes:
         - application/json
         - application/yaml
@@ -208,7 +208,7 @@ paths:
         - APIs
       summary: Deletes the specified API
       description: ''
-      operationId: deleteAPI
+      operationId: delete_api
       parameters:
         - name: owner
           in: path
@@ -236,7 +236,7 @@ paths:
         - APIs
       summary: Publish a particular version of the specified API
       description: ''
-      operationId: publishAPIVersion
+      operationId: publish_api_version
       parameters:
         - name: owner
           in: path
@@ -267,7 +267,7 @@ paths:
         - APIs
       summary: Deletes a particular version of the specified API
       description: ''
-      operationId: deleteAPIVersion
+      operationId: delete_api_version
       parameters:
         - name: owner
           in: path
@@ -303,7 +303,7 @@ paths:
         Retrieves the Swagger definition for the specified API and version in
         JSON format
       description: ''
-      operationId: getJsonDefinition
+      operationId: get_json_definition
       parameters:
         - name: owner
           in: path
@@ -338,7 +338,7 @@ paths:
         Retrieves the Swagger definition for the specified API and version in
         YAML format
       description: ''
-      operationId: getYamlDefinition
+      operationId: get_yaml_definition
       produces:
         - application/yaml
       parameters:
