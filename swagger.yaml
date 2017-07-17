@@ -71,11 +71,10 @@ paths:
             - ASC
             - DESC
       responses:
-        '303':
-          description: 303 response
-          headers:
-            Location:
-              type: string
+        '200':
+          description: a list of APIs in API meta list format
+          schema:
+            $ref: "#/definitions/APIMetaList"
       security:
         - AuthToken: []
   '/apis/{owner}':
