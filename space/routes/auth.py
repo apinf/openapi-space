@@ -1,7 +1,6 @@
 from flask import Response
 from connexion import request
 from space.models import User, AuthToken
-import json
 
 
 def login():
@@ -9,7 +8,7 @@ def login():
     if not body["username"] or not body["password"]:
         return Response(status=400)
 
-    user = User.query.get(name=body["username"]).first()
+    user = User.query.get(body["username"])
     if not user:
         return Response(status=404)
     elif not user.check_password(body["password"]):

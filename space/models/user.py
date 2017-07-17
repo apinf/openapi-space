@@ -7,6 +7,8 @@ import base64
 
 from . import db
 
+DEFAULT_EXPIRY = datetime.timedelta(days=14)
+
 
 class User(db.Model):
     __tablename__ = "Users"
@@ -26,28 +28,18 @@ class User(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def check_auth_token(self, token):
-        tokenObj = AuthToken.get_token(self.name, token)
-        if tokenObj.expired():
-            return False
-        tokenObj.refresh()
-        return tokenObj
-
     # Source: https://stackoverflow.com/a/33191626
-    def generate_auth_token(self,
-                            length=64,
-                            expiry=datetime.timedelta(days=14)):
+    def generate_auth_token(self, length=64, expiry=DEFAULT_EXPIRY):
         alnum = ''.join(c for c in map(chr, range(256)) if c.isalnum())
-        token = ''.join(random.choice(alnum) for _ in range(length))
+        token = (''.join(random.choice(alnum) for _ in range(length)))
         hasher = hashlib.sha256()
-        non_hashed_token = token.encode(encoding="utf-8")
-        hasher.update(non_hashed_token)
+        hasher.update(token.encode("utf-8"))
         hashed_token = hasher.digest()
 
         tokenObj = AuthToken(username=self.name, hashed_token=hashed_token)
         tokenObj.refresh(expiry, update=False)
         tokenObj.insert()
-        return tokenObj.encode_token(non_hashed_token)
+        return tokenObj.encode_token(non_hashed_token=token)
 
 
 class AuthToken(db.Model):
@@ -61,7 +53,8 @@ class AuthToken(db.Model):
     def get_token(cls, username, token):
         hasher = hashlib.sha256()
         hasher.update(token.encode("utf-8"))
-        return cls.query.get((username, hasher.digest()))
+        hashed_token = hasher.digest()
+        return cls.query.get((username, hashed_token))
 
     def expired(self):
         if datetime.datetime.now() > self.best_before:
@@ -69,7 +62,7 @@ class AuthToken(db.Model):
             return True
         return False
 
-    def refresh(self, new_time=datetime.timedelta(days=14), update=True):
+    def refresh(self, new_time=DEFAULT_EXPIRY, update=True):
         self.best_before = datetime.datetime.now() + new_time
         if update:
             db.session.commit()
@@ -83,16 +76,28 @@ class AuthToken(db.Model):
         db.session.commit()
 
     def encode_token(self, non_hashed_token):
-        return base64.b64encode(
-            json.dumps({
-                "token": non_hashed_token.decode("utf-8"),
-                "user": self.username,
-                #                "best_before": self.best_before
-            }).encode("utf-8")).decode("utf-8")
+        client_token_data = {
+            "token": non_hashed_token,
+            "user": self.username,
+        }
+        client_token_json = json.dumps(client_token_data)
+        # json.dumps outputs a string, but base64 wants bytes.
+        client_token_json = client_token_json.encode("utf-8")
+        # Encode JSON with Base64
+        client_token = base64.b64encode(client_token_json)
+        # We don't want to use bytes for strings, so turn the base64 bytes into
+        # a string.
+        client_token = client_token.decode("utf-8")
+        return client_token
 
     @classmethod
     def decode_token(cls, encoded_token):
-        raw_json = base64.b64decode(encoded_token).decode("utf-8")
+        # Decode base64
+        raw_json = base64.b64decode(encoded_token)
+        # Turn decoded bytes object into a string
+        raw_json = raw_json.decode("utf-8")
+        # Parse the string
         token_data = json.loads(raw_json)
+        # Read the data and get the token
         token = cls.get_token(token_data["user"], token_data["token"])
         return token
