@@ -1,6 +1,5 @@
-#from django.http import JsonResponse
+from django.http import JsonResponse
 
-    #return JSONResponse({'apis': []})
 
 def delete_api(request, owner, api):
     raise NotImplementedError('Handler delete_api not implemented')
@@ -35,7 +34,4 @@ def save_definition(request, owner, api, isPrivate, definition, force):
 
 
 def search_apis(request, query, limit, offset, sort, order):
-    raise NotImplementedError('Handler search_apis not implemented')
-
-
-
+    return JsonResponse([], safe=False)

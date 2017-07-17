@@ -14,5 +14,5 @@ validate_router(router)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^api/', include(router.get_urls(), 'api')),
+    url(r'^api/v1/', include(router.get_urls(), 'api')),
 ]
