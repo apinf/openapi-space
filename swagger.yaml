@@ -31,16 +31,19 @@ paths:
           in: query
           description: free text query to match
           required: false
+          default: ''
           type: string
         - name: limit
           in: query
           description: the maximum number of APIs to return
           required: false
+          default: 0
           type: integer
         - name: offset
           in: query
           description: the offset where to start from when fetching a limited number of APIs
           required: false
+          default: 0
           type: integer
         - name: sort
           in: query
