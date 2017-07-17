@@ -41,7 +41,9 @@ paths:
           schema:
             $ref: "#/definitions/LoginToken"
         '401':
-          description: login failed
+          description: invalid password
+        '404':
+          description: user not found
   /auth/logout:
     post:
       tags:
@@ -470,7 +472,7 @@ definitions:
   Credentials:
     type: object
     properties:
-      name:
+      username:
         type: string
       password:
         type: string
@@ -482,10 +484,10 @@ definitions:
           email:
             type: string
   LoginToken:
-    description: The authentication token sent from the server after a successful login
     type: object
     properties:
       token:
+        description: The authentication token sent from the server after a successful login
         type: string
   APIMeta:
     type: object
