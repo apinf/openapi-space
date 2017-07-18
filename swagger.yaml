@@ -504,6 +504,8 @@ definitions:
       token:
         description: The authentication token sent from the server after a successful login
         type: string
+      username:
+        type: string
   APIMeta:
     type: object
     properties:

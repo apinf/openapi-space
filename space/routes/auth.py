@@ -10,7 +10,7 @@ def login():
         return Response(status=404)
     elif not user.check_password(body["password"]):
         return Response(status=401)
-    return {"token": user.generate_auth_token()}
+    return {"token": user.generate_auth_token(), "username": user.name}
 
 
 def logout():
@@ -45,4 +45,4 @@ def register():
     user = User(name=body["username"], email=body["email"])
     user.set_password(body["password"])
     user.insert()
-    return {"token": user.generate_auth_token()}
+    return {"token": user.generate_auth_token(), "username": user.name}
