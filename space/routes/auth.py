@@ -5,9 +5,6 @@ from space.models import User, AuthToken
 
 def login():
     body = request.json
-    if not body["username"] or not body["password"]:
-        return Response(status=400)
-
     user = User.query.get(body["username"])
     if not user:
         return Response(status=404)
@@ -45,9 +42,6 @@ def ping():
 
 def register():
     body = request.json
-    if "username" not in body or "email" not in body or "password" not in body:
-        return Response(status=400)
-
     user = User(name=body["username"], email=body["email"])
     user.set_password(body["password"])
     user.insert()

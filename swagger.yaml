@@ -481,6 +481,9 @@ securityDefinitions:
 definitions:
   Credentials:
     type: object
+    required:
+      - username
+      - password
     properties:
       username:
         type: string
@@ -490,6 +493,8 @@ definitions:
     allOf:
       - $ref: "#/definitions/Credentials"
       - type: object
+        required:
+          - email
         properties:
           email:
             type: string
