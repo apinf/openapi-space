@@ -45,7 +45,7 @@ def ping():
 
 def register():
     body = request.json
-    if not body["username"] or not body["email"] or not body["password"]:
+    if "username" not in body or "email" not in body or "password" not in body:
         return Response(status=400)
 
     user = User(name=body["username"], email=body["email"])
