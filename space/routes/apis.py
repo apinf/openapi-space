@@ -44,9 +44,7 @@ def get_yaml_definition(owner, api, version):
 
 
 def get_owner_apis(owner, sort, order):
-    query = API.query.with_entities(API.owner, API.name, API.version,
-                                    API.created, API.modified, API.private,
-                                    API.published).filter_by(owner=owner)
+    query = API.query.filter_by(owner=owner)
     if order == "DESC":
         order = desc
     else:
@@ -61,8 +59,8 @@ def get_owner_apis(owner, sort, order):
     elif sort == "OWNER":
         sort = API.owner
 
-    query = query.sort(order(sort))
-    return [result.serialize for result in query.all()]
+    query = query.order_by(order(sort))
+    return [result.serialize(swagger=False) for result in query.all()]
 
 
 def publish_api_version(owner, api, version):

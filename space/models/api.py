@@ -18,7 +18,7 @@ class API(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def serialize(self):
+    def serialize(self, swagger=True):
         data = {
             "owner": self.owner,
             "name": self.name,
@@ -28,6 +28,6 @@ class API(db.Model):
             "private": self.private,
             "published": self.published
         }
-        if len(self.swagger) > 0:
+        if swagger:
             data["swagger"] = json.loads(self.swagger)
         return data
