@@ -233,7 +233,7 @@ paths:
         '200':
           description: a list of API versions in API meta format
           schema:
-            $ref: '#/definitions/APIMeta'
+            $ref: '#/definitions/APIMetaList'
       security:
         - AuthToken: []
     post:
@@ -248,7 +248,6 @@ paths:
       operationId: save_definition
       consumes:
         - application/json
-        - application/yaml
       parameters:
         - name: owner
           in: path
@@ -281,16 +280,18 @@ paths:
       responses:
         '200':
           description: the API was successfully saved
+          schema:
+            $ref: "#/definitions/APIMeta"
         '201':
           description: new API was successfully saved
-        '205':
-          description: the API was successfully saved and should be reloaded
+          schema:
+            $ref: "#/definitions/APIMeta"
         '400':
           description: the Swagger definition was invalid
         '403':
-          description: maximum number of APIs reached
+          description: the API is not owned by the user
         '409':
-          description: can not overwrite a published API version
+          description: can not overwrite a published API version without force=true
         '415':
           description: invalid content type
       security:
@@ -422,6 +423,8 @@ paths:
           schema:
             type: object
             properties: {}
+        '403':
+          description: access denied: api is private
         '404':
           description: specified API not found
       security:
@@ -437,7 +440,7 @@ paths:
       x-swagger-router-controller: space.routes.apis
       operationId: get_yaml_definition
       produces:
-        - application/yaml
+        - text/vnd.yaml
       parameters:
         - name: owner
           in: path
@@ -460,6 +463,8 @@ paths:
           schema:
             type: object
             properties: {}
+        '403':
+          description: access denied: api is private
         '404':
           description: specified API not found
       security:
@@ -493,28 +498,26 @@ definitions:
   APIMeta:
     type: object
     properties:
+      owner:
+        type: string
       name:
         type: string
       description:
         type: string
       versions:
         type: array
-        items:
-          type: object
-          properties:
-            owner:
-              type: string
-            name:
-              type: string
-            url:
-              type: string
-              format: url
-            created:
-              type: string
-              format: date-time
-            modified:
-              type: string
-              format: date-time
+      url:
+        type: string
+        format: url
+      created:
+        type: string
+        format: date-time
+      modified:
+        type: string
+        format: date-time
+      swagger:
+        type: object
+        description: An optional Swagger spec. Not included in meta lists.
   APIMetaList:
     type: array
     items:
