@@ -25,6 +25,8 @@ def logout():
 
 
 def check_token():
+    if "Authorization" not in request.headers:
+        return None
     encoded_token = request.headers["Authorization"]
     if not encoded_token:
         return None
