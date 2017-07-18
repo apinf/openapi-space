@@ -260,7 +260,7 @@ paths:
           description: API identifier
           required: true
           type: string
-        - name: isPrivate
+        - name: private
           in: query
           description: Defines whether the API has to be private
           required: false
@@ -277,6 +277,7 @@ paths:
           description: force update
           required: false
           type: boolean
+          default: false
       responses:
         '200':
           description: the API was successfully saved
