@@ -1,4 +1,4 @@
-from sqlalchemy import desc, asc
+from sqlalchemy import desc, asc, or_
 from flask import Response
 from connexion import request
 import yaml
@@ -20,6 +20,24 @@ def serialize_api_meta_list(api_list, show_private=False):
         api_meta.serialize(swagger=False) for api_meta in api_list
         if show_private or not api_meta.private
     ]
+
+
+def parse_order(order, sort):
+    if order == "DESC":
+        order = desc
+    else:
+        order = asc
+
+    if sort == "NAME":
+        sort = API.name
+    elif sort == "CREATED":
+        sort = API.created
+    elif sort == "UPDATED":
+        sort = API.updated
+    elif sort == "OWNER":
+        sort = API.owner
+
+    return order(sort)
 
 
 def delete_api(owner, api):
@@ -90,22 +108,8 @@ def get_owner_apis(owner, sort, order):
     token = check_token()
     (owner, show_private) = get_owner(token, owner)
 
-    query = API.query.filter_by(owner=owner)
-    if order == "DESC":
-        order = desc
-    else:
-        order = asc
+    query = API.query.filter_by(owner=owner).order_by(parse_order(order, sort))
 
-    if sort == "NAME":
-        sort = API.name
-    elif sort == "CREATED":
-        sort = API.created
-    elif sort == "UPDATED":
-        sort = API.updated
-    elif sort == "OWNER":
-        sort = API.owner
-
-    query = query.order_by(order(sort))
     return serialize_api_meta_list(query.all())
 
 
@@ -130,8 +134,8 @@ def save_definition(owner, api, private, force):
         return Response(status=403)
 
     swagger = request.json
-    if (not swagger or "info" not in swagger or
-            "version" not in swagger["info"]):
+    if (not swagger or "info" not in swagger
+            or "version" not in swagger["info"]):
         return Response(status=400)
 
     swagger_str = json.dumps(swagger)
@@ -163,4 +167,10 @@ def save_definition(owner, api, private, force):
 
 
 def search_apis(query, limit, offset, sort, order):
-    raise NotImplementedError('Handler search_apis not implemented')
+    searchterm = '%{0}%'.format(query)
+    query = API.query\
+        .filter(or_(API.owner.like(searchterm), API.name.like(searchterm)))\
+        .order_by(parse_order(order, sort))\
+        .offset(offset)\
+        .limit(limit).all()
+    return serialize_api_meta_list(query)
