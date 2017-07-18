@@ -9,6 +9,19 @@ from space.models import API
 from .auth import check_token
 
 
+def get_owner(token, request_owner):
+    if token and (request_owner == 'me' or request_owner == token.username):
+        return (token.username, True)
+    return (request_owner, False)
+
+
+def serialize_api_meta_list(api_list, show_private=False):
+    return [
+        api_meta.serialize(swagger=False) for api_meta in api_list
+        if show_private or not api_meta.private
+    ]
+
+
 def delete_api(owner, api):
     raise NotImplementedError('Handler delete_api not implemented')
 
@@ -18,32 +31,44 @@ def delete_api_version(owner, api, version):
 
 
 def get_api_versions(owner, api):
-    raise NotImplementedError('Handler get_api_versions not implemented')
+    token = check_token()
+    (owner, show_private) = get_owner(token, owner)
+
+    versions = API.query.filter_by(owner=owner, name=api).all()
+    return serialize_api_meta_list(versions)
 
 
 def get_json_definition(owner, api, version):
-    api = API.query.filter_by(owner=owner, name=api, version=version).first()
+    token = check_token()
+    (owner, show_private) = get_owner(token, owner)
+    api = API.query.get((owner, api, version))
     if not api:
         return Response(status=404)
-    token = check_token()
-    if api.private and (not token or token.username != api.owner):
+    elif api.private and not show_private:
         return Response(status=403)
     return Response(content_type="application/json", response=api.swagger)
 
 
 def get_yaml_definition(owner, api, version):
-    api = API.query.filter_by(owner=owner, name=api, version=version).first()
+    token = check_token()
+    (owner, show_private) = get_owner(token, owner)
+    api = API.query.get((owner, api, version))
     if not api:
         return Response(status=404)
-    token = check_token()
-    if api.private and (not token or token.username != api.owner):
+    elif api.private and not show_private:
         return Response(status=403)
-    swagger = json.loads(api.swagger)
-    swagger_yaml = yaml.dump(swagger)
+    try:
+        swagger = json.loads(api.swagger)
+        swagger_yaml = yaml.dump(swagger)
+    except ValueError:
+        return Response(status=500)
     return Response(content_type="text/vnd.yaml", response=swagger_yaml)
 
 
 def get_owner_apis(owner, sort, order):
+    token = check_token()
+    (owner, show_private) = get_owner(token, owner)
+
     query = API.query.filter_by(owner=owner)
     if order == "DESC":
         order = desc
@@ -60,20 +85,27 @@ def get_owner_apis(owner, sort, order):
         sort = API.owner
 
     query = query.order_by(order(sort))
-    return [result.serialize(swagger=False) for result in query.all()]
+    return serialize_api_meta_list(query.all())
 
 
 def publish_api_version(owner, api, version):
-    raise NotImplementedError('Handler publish_api_version not implemented')
-
-
-def save_definition(owner, api, private, definition, force):
-    token = check_token()
-    if not token:
+    (owner, is_own) = get_owner(check_token(), owner)
+    if not is_own:
         return Response(status=403)
-    if owner == 'me':
-        owner = token.username
-    elif token.username != owner:
+
+    api = API.query.get((owner, api, version))
+    if not api:
+        return Response(status=404)
+    elif api.published:
+        return Response(status=409)
+    api.published = True
+    api.update()
+    return Response(status=200)
+
+
+def save_definition(owner, api, private, force):
+    (owner, is_own) = get_owner(check_token(), owner)
+    if not is_own:
         return Response(status=403)
 
     swagger = request.json
@@ -85,16 +117,27 @@ def save_definition(owner, api, private, definition, force):
     name = api
     version = swagger["info"]["version"]
     now = datetime.now()
-    api = API(
-        owner=owner,
-        name=name,
-        version=version,
-        created=now,
-        modified=now,
-        private=private,
-        published=False,
-        swagger=swagger_str)
-    api.insert()
+    api = API.query.get((owner, api, version))
+    if not api:
+        api = API(
+            owner=owner,
+            name=name,
+            version=version,
+            created=now,
+            modified=now,
+            private=private,
+            published=False,
+            swagger=swagger_str)
+        api.insert()
+        return api.serialize(), 201
+    else:
+        if api.published and not force:
+            return Response(status=409)
+        api.swagger = swagger_str
+        api.modified = now
+        if type(private) == bool:
+            api.private = private
+        api.update()
     return api.serialize()
 
 
