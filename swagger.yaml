@@ -270,7 +270,7 @@ paths:
           description: the Swagger definition of this API
           required: true
           schema:
-            type: string
+            type: object
         - name: force
           in: query
           description: force update
