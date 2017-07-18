@@ -14,5 +14,6 @@ validate_router(router)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^auth/', include('django.contrib.auth.urls')),
     url(r'^api/v1/', include(router.get_urls(), 'api')),
 ]
