@@ -1,0 +1,3 @@
+[submodule "space/lepo"]
+	path = space/lepo
+	url = git@github.com:akx/lepo.git

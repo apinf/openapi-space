@@ -1,0 +1,7 @@
+Django==1.11.3
+iso8601==0.1.11
+jsonschema==2.6.0
+lepo==0.0.0
+marshmallow==3.0.0b2
+pytz==2017.2
+PyYAML==3.12
