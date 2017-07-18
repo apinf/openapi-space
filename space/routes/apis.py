@@ -23,11 +23,32 @@ def serialize_api_meta_list(api_list, show_private=False):
 
 
 def delete_api(owner, api):
-    raise NotImplementedError('Handler delete_api not implemented')
+    (owner, is_own) = get_owner(check_token(), owner)
+    if not is_own:
+        return Response(status=403)
+
+    deleted = []
+    for version in API.query.filter_by(owner=owner, name=api):
+        deleted.push(version.serialize())
+        version.delete()
+    return deleted
 
 
 def delete_api_version(owner, api, version):
-    raise NotImplementedError('Handler delete_api_version not implemented')
+    (owner, is_own) = get_owner(check_token(), owner)
+    if not is_own:
+        return Response(status=403)
+
+    num_of_versions = API.query.filter_by(owner=owner, name=api).count()
+    if num_of_versions == 0:
+        return Response(status=404)
+    elif num_of_versions < 2:
+        return Response(status=409)
+    api = API.query.get((owner, api, version))
+    if not api:
+        return Response(status=404)
+    api.delete()
+    return api.serialize()
 
 
 def get_api_versions(owner, api):

@@ -317,6 +317,8 @@ paths:
       responses:
         '200':
           description: the API was successfully deleted
+          schema:
+            $ref: "#/definitions/APIMetaList"
         '403':
           description: access denied
         '404':
@@ -383,6 +385,8 @@ paths:
       responses:
         '200':
           description: the API version was successfully deleted
+          schema:
+            $ref: "#/definitions/APIMeta"
         '403':
           description: access denied
         '404':
@@ -424,7 +428,7 @@ paths:
             type: object
             properties: {}
         '403':
-          description: access denied: api is private
+          description: "access denied: api is private"
         '404':
           description: specified API not found
       security:
@@ -464,7 +468,7 @@ paths:
             type: object
             properties: {}
         '403':
-          description: access denied: api is private
+          description: "access denied: api is private"
         '404':
           description: specified API not found
       security:

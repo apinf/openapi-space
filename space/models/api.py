@@ -21,6 +21,10 @@ class API(db.Model):
     def update(self):
         db.session.commit()
 
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
     def serialize(self, swagger=True):
         data = {
             "owner": self.owner,
