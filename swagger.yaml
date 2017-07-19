@@ -12,6 +12,8 @@ basePath: /api/v1
 tags:
   - name: APIs
     description: Operations for APIs
+  - name: Auth
+    description: Operations for authentication
 schemes:
   - https
 produces:
@@ -19,12 +21,96 @@ produces:
 consumes:
   - application/json
 paths:
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Log in to OpenAPI space
+      description: ''
+      x-swagger-router-controller: space.routes.auth
+      operationId: login
+      parameters:
+        - name: body
+          in: body
+          description: the user credentials
+          schema:
+            $ref: "#/definitions/Credentials"
+      responses:
+        '200':
+          description: login successful
+          schema:
+            $ref: "#/definitions/LoginToken"
+        '401':
+          description: invalid password
+        '404':
+          description: user not found
+  /auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: Log out from OpenAPI space
+      description: ''
+      x-swagger-router-controller: space.routes.auth
+      operationId: logout
+      responses:
+        '200':
+          description: logout successful
+        '403':
+          description: user was not logged in
+      security:
+        - AuthToken: []
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register to OpenAPI space
+      description: ''
+      x-swagger-router-controller: space.routes.auth
+      operationId: register
+      parameters:
+        - name: body
+          in: body
+          description: registration details
+          schema:
+            $ref: "#/definitions/Registration"
+      responses:
+        '200':
+          description: registration successful
+          schema:
+            $ref: "#/definitions/LoginToken"
+        '409':
+          description: username or email taken
+          schema:
+            type: string
+            description: defines which field is already in use
+            enum:
+              - EMAIL
+              - USERNAME
+  /auth/ping:
+    post:
+      tags:
+        - Auth
+      summary: Check whether or not you are authenticated
+      description: ''
+      x-swagger-router-controller: space.routes.auth
+      operationId: ping
+      responses:
+        '200':
+          description: logged in
+          schema:
+            $ref: "#/definitions/Registration"
+        '403':
+          description: not logged in
+      security:
+        - AuthToken: []
+
   /apis:
     get:
       tags:
         - APIs
       summary: Retrieves a list of currently defined APIs in API meta list format.
       description: ''
+      x-swagger-router-controller: space.routes.apis
       operationId: search_apis
       parameters:
         - name: query
@@ -83,6 +169,7 @@ paths:
         - APIs
       summary: Retrieves an API meta listing of all APIs defined for this owner
       description: ''
+      x-swagger-router-controller: space.routes.apis
       operationId: get_owner_apis
       parameters:
         - name: owner
@@ -119,7 +206,7 @@ paths:
         '200':
           description: a list of APIs in API meta list format
           schema:
-            $ref: '#/definitions/APIList'
+            $ref: '#/definitions/APIMetaList'
       security:
         - AuthToken: []
   '/apis/{owner}/{api}':
@@ -129,6 +216,7 @@ paths:
       summary: >-
         Retrieves an API meta listing for all API versions for this owner and
         API
+      x-swagger-router-controller: space.routes.apis
       operationId: get_api_versions
       parameters:
         - name: owner
@@ -145,7 +233,7 @@ paths:
         '200':
           description: a list of API versions in API meta format
           schema:
-            $ref: '#/definitions/APIMeta'
+            $ref: '#/definitions/APIMetaList'
       security:
         - AuthToken: []
     post:
@@ -156,10 +244,10 @@ paths:
         Saves the provided Swagger definition; the owner must match the token
         owner. The version will be extracted from the Swagger definitions
         itself.
+      x-swagger-router-controller: space.routes.apis
       operationId: save_definition
       consumes:
         - application/json
-        - application/yaml
       parameters:
         - name: owner
           in: path
@@ -171,7 +259,7 @@ paths:
           description: API identifier
           required: true
           type: string
-        - name: isPrivate
+        - name: private
           in: query
           description: Defines whether the API has to be private
           required: false
@@ -182,25 +270,28 @@ paths:
           description: the Swagger definition of this API
           required: true
           schema:
-            type: string
+            type: object
         - name: force
           in: query
           description: force update
           required: false
           type: boolean
+          default: false
       responses:
         '200':
           description: the API was successfully saved
+          schema:
+            $ref: "#/definitions/APIMeta"
         '201':
           description: new API was successfully saved
-        '205':
-          description: the API was successfully saved and should be reloaded
+          schema:
+            $ref: "#/definitions/APIMeta"
         '400':
           description: the Swagger definition was invalid
         '403':
-          description: maximum number of APIs reached
+          description: the API is not owned by the user
         '409':
-          description: can not overwrite a published API version
+          description: can not overwrite a published API version without force=true
         '415':
           description: invalid content type
       security:
@@ -210,6 +301,7 @@ paths:
         - APIs
       summary: Deletes the specified API
       description: ''
+      x-swagger-router-controller: space.routes.apis
       operationId: delete_api
       parameters:
         - name: owner
@@ -225,6 +317,8 @@ paths:
       responses:
         '200':
           description: the API was successfully deleted
+          schema:
+            $ref: "#/definitions/APIMetaList"
         '403':
           description: access denied
         '404':
@@ -238,6 +332,7 @@ paths:
         - APIs
       summary: Publish a particular version of the specified API
       description: ''
+      x-swagger-router-controller: space.routes.apis
       operationId: publish_api_version
       parameters:
         - name: owner
@@ -269,6 +364,7 @@ paths:
         - APIs
       summary: Deletes a particular version of the specified API
       description: ''
+      x-swagger-router-controller: space.routes.apis
       operationId: delete_api_version
       parameters:
         - name: owner
@@ -289,6 +385,8 @@ paths:
       responses:
         '200':
           description: the API version was successfully deleted
+          schema:
+            $ref: "#/definitions/APIMeta"
         '403':
           description: access denied
         '404':
@@ -305,6 +403,7 @@ paths:
         Retrieves the Swagger definition for the specified API and version in
         JSON format
       description: ''
+      x-swagger-router-controller: space.routes.apis
       operationId: get_json_definition
       parameters:
         - name: owner
@@ -328,6 +427,8 @@ paths:
           schema:
             type: object
             properties: {}
+        '403':
+          description: "access denied: api is private"
         '404':
           description: specified API not found
       security:
@@ -340,9 +441,10 @@ paths:
         Retrieves the Swagger definition for the specified API and version in
         YAML format
       description: ''
+      x-swagger-router-controller: space.routes.apis
       operationId: get_yaml_definition
       produces:
-        - application/yaml
+        - text/vnd.yaml
       parameters:
         - name: owner
           in: path
@@ -365,6 +467,8 @@ paths:
           schema:
             type: object
             properties: {}
+        '403':
+          description: "access denied: api is private"
         '404':
           description: specified API not found
       security:
@@ -375,31 +479,56 @@ securityDefinitions:
     name: Authorization
     in: header
 definitions:
+  Credentials:
+    type: object
+    required:
+      - username
+      - password
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+  Registration:
+    allOf:
+      - $ref: "#/definitions/Credentials"
+      - type: object
+        required:
+          - email
+        properties:
+          email:
+            type: string
+  LoginToken:
+    type: object
+    properties:
+      token:
+        description: The authentication token sent from the server after a successful login
+        type: string
+      username:
+        type: string
   APIMeta:
     type: object
     properties:
+      owner:
+        type: string
       name:
         type: string
       description:
         type: string
       versions:
         type: array
-        items:
-          type: object
-          properties:
-            owner:
-              type: string
-            name:
-              type: string
-            url:
-              type: string
-              format: url
-            created:
-              type: string
-              format: date-time
-            modified:
-              type: string
-              format: date-time
+      url:
+        type: string
+        format: url
+      created:
+        type: string
+        format: date-time
+      modified:
+        type: string
+        format: date-time
+      swagger:
+        type: object
+        description: An optional Swagger spec. Not included in meta lists.
   APIMetaList:
     type: array
     items:

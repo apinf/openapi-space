@@ -1,0 +1,3 @@
+base_url: https://openapi.space/api/v1
+secret_key: Highly secret secret key
+database_uri: sqlite:///space.db
