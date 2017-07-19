@@ -134,8 +134,8 @@ def save_definition(owner, api, private, force):
         return Response(status=403)
 
     swagger = request.json
-    if (not swagger or "info" not in swagger
-            or "version" not in swagger["info"]):
+    if (not swagger or "info" not in swagger or
+            "version" not in swagger["info"]):
         return Response(status=400)
 
     swagger_str = json.dumps(swagger)
@@ -168,9 +168,9 @@ def save_definition(owner, api, private, force):
 
 def search_apis(query, limit, offset, sort, order):
     searchterm = '%{0}%'.format(query)
-    query = API.query\
-        .filter(or_(API.owner.like(searchterm), API.name.like(searchterm)))\
-        .order_by(parse_order(order, sort))\
-        .offset(offset)\
+    query = API.query \
+        .filter(or_(API.owner.like(searchterm), API.name.like(searchterm))) \
+        .order_by(parse_order(order, sort)) \
+        .offset(offset) \
         .limit(limit).all()
     return serialize_api_meta_list(query)
