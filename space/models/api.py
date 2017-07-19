@@ -1,6 +1,7 @@
 import json
 
 from . import db
+from space.app import space
 
 
 class API(db.Model):
@@ -33,8 +34,13 @@ class API(db.Model):
             "created": self.created.isoformat(),
             "modified": self.modified.isoformat(),
             "private": self.private,
-            "published": self.published
-        }
+            "published": self.published,
+            "url": "%s/apis/%s/%s/%s/swagger.json" % (
+                space.config["BASE_URL"],
+                self.owner,
+                self.name,
+                self.version)
+        }  # yapf: disable
         if swagger:
             data["swagger"] = json.loads(self.swagger)
         return data
