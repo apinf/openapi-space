@@ -17,7 +17,19 @@ def login():
 
 def login_apinf_token():
     body = request.json
-    (username, email) = apinf.check_token(body["user_id"], body["auth_token"])
+    return check_apinf_token(body["user_id"], body["auth_token"])
+
+
+def login_apinf():
+    body = request.json
+    (user_id, auth_token) = apinf.login(body["username"], body["password"])
+    if not user_id:
+        return Response(status=401)
+    return check_apinf_token(user_id, auth_token)
+
+
+def check_apinf_token(user_id, auth_token):
+    (username, email) = apinf.check_token(user_id, auth_token)
     if not username:
         return Response(status=401)
 
@@ -25,7 +37,10 @@ def login_apinf_token():
     user = User.query.get(username)
     if not user:
         # Email left out because of uniqueness problems
-        user = User(name=username, hashed_password="", email="")
+        user = User(
+            name=username,
+            hashed_password="",
+            email="%s@remote_login/apinf" % username)
         user.insert()
     return {"token": user.generate_auth_token(), "username": user.name}
 
