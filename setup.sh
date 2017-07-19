@@ -2,7 +2,7 @@
 python=$(which python3)
 if [[ -z $python ]]; then
 	echo "I couldn't find a Python 3 installation :("
-	echo "Make you have python3 in your PATH."
+	echo "Make sure you have python3 in your PATH."
 	exit 1
 fi
 
