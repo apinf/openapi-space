@@ -4,6 +4,7 @@ from Crypto.Random import random
 import datetime
 import json
 import base64
+import string
 
 from . import db
 
@@ -30,8 +31,9 @@ class User(db.Model):
 
     # Source: https://stackoverflow.com/a/33191626
     def generate_auth_token(self, length=64, expiry=DEFAULT_EXPIRY):
-        alnum = ''.join(c for c in map(chr, range(256)) if c.isalnum())
-        token = (''.join(random.choice(alnum) for _ in range(length)))
+        token = ''.join(
+            random.choice(string.ascii_uppercase + string.ascii_lowercase +
+                          string.digits) for _ in range(length))
         hasher = hashlib.sha256()
         hasher.update(token.encode("utf-8"))
         hashed_token = hasher.digest()
