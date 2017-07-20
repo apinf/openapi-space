@@ -1,3 +1,4 @@
 base_url: https://openapi.space/api/v1
 secret_key: Highly secret secret key
 database_uri: sqlite:///space.db
+apinf_base_url: https://apinf.io/rest/v1

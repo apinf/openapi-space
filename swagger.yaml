@@ -44,6 +44,64 @@ paths:
           description: invalid password
         '404':
           description: user not found
+  /auth/login/apinf_token:
+    post:
+      tags:
+        - Auth
+      summary: Log in to OpenAPI space using an APInf authentication token
+      description: ''
+      x-swagger-router-controller: space.routes.auth
+      operationId: login_apinf_token
+      parameters:
+        - name: body
+          in: body
+          description: the APInf authentication token and user ID
+          schema:
+            type: object
+            required:
+              - user_id
+              - auth_token
+            properties:
+              user_id:
+                type: string
+              auth_token:
+                type: string
+      responses:
+        '200':
+          description: login successful
+          schema:
+            $ref: "#/definitions/LoginToken"
+        '401':
+          description: invalid user ID or auth token
+  /auth/login/apinf:
+    post:
+      tags:
+        - Auth
+      summary: Log in to OpenAPI space using an APInf account
+      description: ''
+      x-swagger-router-controller: space.routes.auth
+      operationId: login_apinf
+      parameters:
+        - name: body
+          in: body
+          description: the APInf username and password
+          schema:
+            type: object
+            required:
+              - username
+              - password
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        '200':
+          description: login successful
+          schema:
+            $ref: "#/definitions/LoginToken"
+        '401':
+          description: invalid username or password
   /auth/logout:
     post:
       tags:

@@ -1,5 +1,7 @@
 from flask import Response
 from connexion import request
+
+from space.integration import apinf
 from space.models import User, AuthToken
 
 
@@ -10,6 +12,36 @@ def login():
         return Response(status=404)
     elif not user.check_password(body["password"]):
         return Response(status=401)
+    return {"token": user.generate_auth_token(), "username": user.name}
+
+
+def login_apinf_token():
+    body = request.json
+    return check_apinf_token(body["user_id"], body["auth_token"])
+
+
+def login_apinf():
+    body = request.json
+    (user_id, auth_token) = apinf.login(body["username"], body["password"])
+    if not user_id:
+        return Response(status=401)
+    return check_apinf_token(user_id, auth_token)
+
+
+def check_apinf_token(user_id, auth_token):
+    (username, email) = apinf.check_token(user_id, auth_token)
+    if not username:
+        return Response(status=401)
+
+    username = "apinf:%s" % username
+    user = User.query.get(username)
+    if not user:
+        # Email left out because of uniqueness problems
+        user = User(
+            name=username,
+            hashed_password="",
+            email="%s@remote_login/apinf" % username)
+        user.insert()
     return {"token": user.generate_auth_token(), "username": user.name}
 
 
@@ -42,7 +74,14 @@ def ping():
 
 def register():
     body = request.json
-    user = User(name=body["username"], email=body["email"])
+    username = body["username"]
+    if ":" in username:
+        return Response(status=400)
+    email = body["email"]
+    if "@" not in email:
+        return Response(status=400)
+
+    user = User(name=username, email=email)
     user.set_password(body["password"])
     user.insert()
     return {"token": user.generate_auth_token(), "username": user.name}
