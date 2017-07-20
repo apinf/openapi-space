@@ -1,0 +1,6 @@
+language: python
+python:
+    - "3.6"
+    - "3.5"
+before_script:
+    flake8 space/
