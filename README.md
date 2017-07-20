@@ -9,7 +9,9 @@ A backend for storing OpenAPI specifications
 2. Run the server (`./start.sh`)
 
 ### Automated, Docker
-TODO
+1. Build the image (`docker build . -t openapi-space`)
+2. Run  `docker run -p <port>:80 openapi-space` replacing `<port>` with the port you want the app to be accessible at.
+3. OpenAPI space should now be accessible at `http://localhost:<port>`
 
 ### Manual
 1. Install virtualenv
@@ -17,5 +19,5 @@ TODO
 3. Enter the virtualenv (`source venv/bin/activate`)
 4. Install dependencies (`pip install -r requirements.txt`)
 5. Start the server
-  * Development mode: `python main.py`
-  * uWSGI: `uwsgi --ini uwsgi.ini`
+   * Development mode: `python main.py`
+   * uWSGI: `uwsgi --ini uwsgi.ini`
