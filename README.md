@@ -1,4 +1,6 @@
 # OpenAPI space
+![Build Status](https://travis-ci.org/apinf/openapi-space.svg?branch=master)
+
 A backend for storing OpenAPI specifications
 
 ## Setup
