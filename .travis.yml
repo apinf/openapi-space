@@ -5,3 +5,6 @@ before_install:
     - pip install pytest-flake8
 script:
     - pytest --flake8
+branches:
+    only:
+        - master
