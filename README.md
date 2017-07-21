@@ -1,6 +1,7 @@
 # OpenAPI space
-A backend for storing OpenAPI specifications
+![Build Status](https://travis-ci.org/apinf/openapi-space.svg?branch=master)
 
+A backend for storing OpenAPI specifications
 ## Setup
 0. Have Python 3.5 or higher installed. Lower python 3.x versions may or may not work.
 
