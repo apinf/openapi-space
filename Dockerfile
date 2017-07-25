@@ -4,6 +4,7 @@ RUN pip install uwsgi
 
 WORKDIR /app
 COPY requirements.txt /app/
+COPY requirements/ /app/requirements
 RUN pip install -r requirements.txt
 COPY . /app/
 
