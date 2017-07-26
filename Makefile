@@ -14,3 +14,8 @@ lint:
 
 test: lint
 	py.test
+
+setup:
+	bash scripts/setup.sh
+start:
+	bash scripts/start.sh
