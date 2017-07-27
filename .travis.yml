@@ -8,6 +8,4 @@ install:
 
 script:
     - make test
-    - make docker-build
-after_success:
-    - make docker-push
+    - make docker

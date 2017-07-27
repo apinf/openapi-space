@@ -21,8 +21,5 @@ setup:
 start:
 	bash scripts/start.sh
 
-docker-build:
+docker:
 	bash scripts/docker-build.sh
-
-docker-push:
-	bash scripts/docker-push.sh
