@@ -17,5 +17,12 @@ test: lint
 
 setup:
 	bash scripts/setup.sh
+
 start:
 	bash scripts/start.sh
+
+docker-build:
+	bash scripts/docker-build.sh
+
+docker-push:
+	bash scripts/docker-push.sh
