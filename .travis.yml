@@ -1,10 +1,10 @@
 language: python
 python:
     - "3.5"
-before_install:
-    - pip install pytest-flake8
+    - "3.6"
+
+install:
+  - pip install -r requirements/ci.txt
+
 script:
-    - pytest --flake8
-branches:
-    only:
-        - master
+    - make test

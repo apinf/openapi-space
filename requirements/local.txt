@@ -1,0 +1,4 @@
+-r ci.txt
+
+pudb==2017.1.2
+pytest-pudb==0.5

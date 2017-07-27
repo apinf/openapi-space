@@ -11,5 +11,9 @@ virtualenv -p $python venv
 source venv/bin/activate
 echo "Installing dependencies..."
 pip install -r requirements.txt
+if [ ! -f config.yaml ]; then
+    cp example-config.yaml config.yaml
+    echo "Copying example-config.yaml to config.yaml"
+fi
 echo "All done!"
 echo 'Use `./start.sh` to start the server in debug mode.'
