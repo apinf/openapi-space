@@ -42,7 +42,7 @@ class API(db.Model):
             "url": "%s/apis/%s/%s/%s/swagger.json" % (
                 space.config["BASE_URL"],
                 self.owner,
-                self.name,
+                self.name.replace(" ", "%20"),
                 self.version)
         }  # yapf: disable
         if swagger:
