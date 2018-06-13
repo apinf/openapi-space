@@ -6,6 +6,13 @@ if [[ -z $python ]]; then
 	exit 1
 fi
 
+pip=$(which pip3)
+if [[ -z $pip ]]; then
+	echo "I couldn't find a pip 3 installation :("
+	echo "Make sure you have pip3 in your PATH."
+	exit 1
+fi
+
 echo "Creating virtual environment..."
 virtualenv -p $python venv
 source venv/bin/activate
