@@ -114,7 +114,7 @@ def get_owner_apis(owner, sort, order):
 
     query = API.query.filter_by(owner=owner).order_by(parse_order(order, sort))
 
-    return serialize_api_meta_list(query.all())
+    return serialize_api_meta_list(query.all(),show_private)
 
 
 def publish_api_version(owner, api, version):
