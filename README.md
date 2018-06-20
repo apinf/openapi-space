@@ -23,3 +23,6 @@ A backend for storing OpenAPI specifications
 5. Start the server
    * Development mode: `python main.py`
    * uWSGI: `uwsgi --ini uwsgi.ini`
+
+## Development Status
+[![Throughput Graph](https://graphs.waffle.io/apinf/openapi-space/throughput.svg)](https://waffle.io/apinf/openapi-space/metrics)
